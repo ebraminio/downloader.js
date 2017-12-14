@@ -1,14 +1,31 @@
-<canvas height="15" width="300"></canvas>
+<div id="progress">
+  <div id="progress-overlay"></div>
+  <canvas id="progress-canvas" width="400" height="30"></canvas>
+</div>
 <style>
-  canvas {
-    border: 1px solid grey;
-    padding: 1px;
+  #progress {
+    border: 1px solid #adadad;
     border-radius: 2px;
+  }
+  #progress, #progress-overlay, #progress-canvas {
+    width: 400px;
+    height: 30px;
+  }
+  #progress-overlay {
+    position: absolute;
+    background-image: -webkit-linear-gradient(
+      top,
+      rgba(255, 255, 255, .8) 0%,
+      rgba(255, 255, 255, .4) 50%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(255, 255, 255, .2) 100%
+    );
   }
 </style>
 <script>
-  var canvas = document.getElementsByTagName('canvas')[0];
+  var canvas = document.getElementById('progress-canvas');
   var width = canvas.width;
+  var height = canvas.height;
   var chunks = 4;
   var ctx = canvas.getContext('2d');
 
@@ -16,7 +33,7 @@
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/a.bin');
     xhr.onreadystatechange = () => {
-      resolve(+xhr.getResponseHeader("Content-Length"));
+      resolve(+xhr.getResponseHeader('Content-Length'));
       xhr.abort();
     };
     xhr.send();
@@ -38,7 +55,7 @@
           if (evt.lengthComputable) {
             var x = (evt.loaded / evt.total) * (width / chunks);
             ctx.fillStyle = '#5cb85c';
-            ctx.fillRect(((width / chunks) * i), 0, x, 15);
+            ctx.fillRect(((width / chunks) * i), 0, x, height);
           }
         };
 
@@ -46,7 +63,7 @@
         xhr.responseType = 'blob';
         var chunk_size = Math.floor(size / chunks);
         var start = i * chunk_size;
-        var end = i === 3 ? size : ((i + 1) * chunk_size - 1);
+        var end = i === 3 ? size - 1 : ((i + 1) * chunk_size - 1);
         xhr.setRequestHeader('Range', `bytes=${start}-${end}`); // the bytes (incl.) you request
         xhr.send(null);
       });
