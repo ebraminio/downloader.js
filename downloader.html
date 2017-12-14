@@ -3,37 +3,50 @@
 <script>
 var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
 
-Promise.all(new Array(4).fill().map(function (_, i) {
-    return new Promise(function (resolve) {
-        var xhr = new XMLHttpRequest();
+new Promise(resolve => {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/a.bin');
+    xhr.onreadystatechange = () => {
+        resolve(+xhr.getResponseHeader("Content-Length"));
+        xhr.abort();
+    };
+    xhr.send();
+}).then(size => {
+    Promise.all(new Array(4).fill().map((_, i) => {
+        return new Promise(resolve => {
+            var xhr = new XMLHttpRequest();
 
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState !== 4) {
-                return;
-            }
-            window.URL = window.URL || window.webkitURL;
-            
-            resolve(xhr.response);
-        };
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState !== 4) {
+                    return;
+                }
+                window.URL = window.URL || window.webkitURL;
 
-        xhr.onprogress = function (evt) {
-            if (evt.lengthComputable) {
-                var x = (evt.loaded / evt.total) * (100 / 4);
-                ctx.fillStyle = '#5cb85c';
-                ctx.fillRect(((100 / 4) * i), 0, x, 20);
-            }
-        };
+                resolve(xhr.response);
+            };
 
-        xhr.open('GET', 'a.bin', true);
-        xhr.responseType = "blob";
-        xhr.setRequestHeader('Range', 'bytes=' + i * 200000 + '-' + ((i + 1) * 200000 - 1)); // the bytes (incl.) you request
-        xhr.send(null);
+            xhr.onprogress = function (evt) {
+                if (evt.lengthComputable) {
+                    var x = (evt.loaded / evt.total) * (100 / 4);
+                    ctx.fillStyle = '#5cb85c';
+                    ctx.fillRect(((100 / 4) * i), 0, x, 20);
+                }
+            };
+
+            xhr.open('GET', 'a.bin', true);
+            xhr.responseType = 'blob';
+            var start = i * Math.floor(size / 4);
+            var end = i === 3 ? size : ((i + 1) * (size / 4) - 1);
+            xhr.setRequestHeader('Range', `bytes=${start}-${end}`); // the bytes (incl.) you request
+            xhr.send(null);
+        });
+    })).then(function (result) {
+        var anchor = document.createElement('a');
+        anchor.href = URL.createObjectURL(new Blob(result));
+        anchor.download = 'b.bin';
+        anchor.textContent = 'Your download is completed, click here!';
+        document.body.appendChild(anchor);
     });
-})).then(function (result) {
-    var anchor = document.createElement('a');
-    anchor.href = URL.createObjectURL(new Blob(result));
-    anchor.download = 'b.bin';
-    anchor.textContent = 'Your download is completed, click here!';
-    document.body.appendChild(anchor);
+
 });
 </script>
