@@ -1,0 +1,39 @@
+<canvas height="20" width="100"></canvas>
+<style>canvas { border: 1px solid grey; padding: 1px; border-radius: 2px; }</style>
+<script>
+var ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
+
+Promise.all(new Array(4).fill().map(function (_, i) {
+    return new Promise(function (resolve) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState !== 4) {
+                return;
+            }
+            window.URL = window.URL || window.webkitURL;
+            
+            resolve(xhr.response);
+        };
+
+        xhr.onprogress = function (evt) {
+            if (evt.lengthComputable) {
+                var x = (evt.loaded / evt.total) * (100 / 4);
+                ctx.fillStyle = '#5cb85c';
+                ctx.fillRect(((100 / 4) * i), 0, x, 20);
+            }
+        };
+
+        xhr.open('GET', 'a.bin', true);
+        xhr.responseType = "blob";
+        xhr.setRequestHeader('Range', 'bytes=' + i * 200000 + '-' + ((i + 1) * 200000 - 1)); // the bytes (incl.) you request
+        xhr.send(null);
+    });
+})).then(function (result) {
+    var anchor = document.createElement('a');
+    anchor.href = URL.createObjectURL(new Blob(result));
+    anchor.download = 'b.bin';
+    anchor.textContent = 'Your download is completed, click here!';
+    document.body.appendChild(anchor);
+});
+</script>
