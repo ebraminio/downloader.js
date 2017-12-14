@@ -352,7 +352,7 @@ if (timeout !== -1) {
           'Access-Control-Allow-Origin': '*'
         });
         var Throttle = require('throttle');
-        var throttle = new Throttle(1000);
+        var throttle = new Throttle(500000);
         return fs.createReadStream(path, { start: start, end: end }).pipe(throttle).pipe(res);
       }
 
