@@ -11,6 +11,7 @@
     width: 400px;
     height: 30px;
   }
+  /* http://jsfiddle.net/jhogervorst/X78qN/2/ */
   #progress-overlay {
     position: absolute;
     background-image: -webkit-linear-gradient(
@@ -31,6 +32,7 @@
   var fileAddress = '/a.bin';
 
   new Promise(resolve => {
+    // https://stackoverflow.com/a/47822013
     var xhr = new XMLHttpRequest();
     xhr.open('GET', fileAddress);
     xhr.onreadystatechange = () => {
@@ -52,7 +54,7 @@
           resolve(xhr.response);
         };
 
-        xhr.onprogress = function(evt) {
+        xhr.onprogress = function (evt) {
           if (evt.lengthComputable) {
             var x = (evt.loaded / evt.total) * (width / chunks);
             ctx.fillStyle = '#0193CD'; // #0193CD #66D4E5 #5CB85C
@@ -65,10 +67,12 @@
         var chunkSize = Math.floor(size / chunks);
         var start = i * chunkSize;
         var end = i === chunks - 1 ? size - 1 : ((i + 1) * chunkSize - 1);
+        // https://stackoverflow.com/questions/15561508
         xhr.setRequestHeader('Range', `bytes=${start}-${end}`); // the bytes (incl.) you request
         xhr.send(null);
       });
-    })).then(function(result) {
+    })).then(function (result) {
+      // http://jsfiddle.net/kGLnP/5/
       var anchor = document.createElement('a');
       anchor.href = URL.createObjectURL(new Blob(result));
       anchor.download = 'b.bin';
