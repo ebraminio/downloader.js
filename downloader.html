@@ -34,6 +34,8 @@
   new Promise(resolve => {
     // https://stackoverflow.com/a/47822013
     var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
     xhr.open('GET', fileAddress);
     xhr.onreadystatechange = () => {
       resolve(+xhr.getResponseHeader('Content-Length'));
@@ -44,6 +46,7 @@
     Promise.all(new Array(chunks).fill().map((_, i) => {
       return new Promise(resolve => {
         var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
 
         xhr.onreadystatechange = () => {
           if (xhr.readyState !== 4) {
